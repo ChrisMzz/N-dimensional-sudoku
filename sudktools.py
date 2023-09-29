@@ -11,11 +11,12 @@ def N_choose_two(N):
         elements.pop(0)
     return projections
 
-
+count = 0  
 class Sudoku:
     def __init__(self,N=2,digits=9, **kwargs):
         if N < 2: N = 2
         self.N = N
+        if digits != int(np.sqrt(digits))**2 : raise ValueError('digits must be a perfect square')
         self.digits = digits
         self.shape = tuple([digits]*N)
         self.grid = np.zeros(self.shape, dtype=np.int8)
@@ -62,13 +63,15 @@ class Sudoku:
         on_line = False
         axes = [ax for ax in range(self.N)]
         for _ in range(self.N):
-            if n in grid.transpose(axes)[indices[axes[0]]]:
+            projected_idx = tuple([indices[i] for i in axes])
+            if n in grid.transpose(tuple(axes))[projected_idx[:-1]]:
                 on_line = True
             axes.append(axes.pop(0))
         return on_line
     
     def in_square(self, grid, indices, n): # tN different projections (because N choose 2 dimensions to project on)
         in_any_square = False
+        sq_size = int(np.sqrt(self.digits))
         for projection in N_choose_two(self.N):
             # [[indices[i] for i in projection][:-2]]
             # permutation of indices using projection
@@ -76,10 +79,15 @@ class Sudoku:
             # otherwise
             subgrid = grid.transpose(projection)[tuple([indices[i] for i in projection][:-2])]
             line, column = [indices[i] for i in projection][-2:]
-            subline = subgrid[:3] if line < 3 else subgrid[3:6] if line < 6 else subgrid[6:]
-            square = subline[:,:3] if column < 3 else subline[:,3:6] if column < 6 else subline[:,6:]
-            #pdb.set_trace()
-            if n in square.reshape(1,self.digits):
+            
+            # subline = subgrid[:3] if line < 3 else subgrid[3:6] if line < 6 else subgrid[6:]
+            # square = subline[:,:3] if column < 3 else subline[:,3:6] if column < 6 else subline[:,6:]
+            # generalising lines above by using evaluation of reg string
+            subline = eval(f'subgrid[:{sq_size}]'+\
+                ''.join([f' if line < {k-sq_size} else subgrid[{k-sq_size}:{k}]' for k in range(sq_size*2, self.digits+1, sq_size)]))
+            square = eval(f'subline[:,:{sq_size}]'+\
+                ''.join([f' if column < {k-sq_size} else subline[:,{k-sq_size}:{k}]' for k in range(sq_size*2, self.digits+1, sq_size)]))            
+            if n in square:
                 in_any_square = True
         return in_any_square
             
@@ -87,14 +95,13 @@ class Sudoku:
         if self.xtra_rules == []: return False
         # check different rules per added constraint
         
-    
+  
     def fill(self):
         """Fill an empty grid conformly to how sudokus rules work.
 
         Returns:
             _type_: _description_
         """
-
         numbers = self.numbers
         for pos in range(self.grid.size):
             indices = self.find_indices(pos)
@@ -116,6 +123,6 @@ class Sudoku:
 
 if __name__ == '__main__':
 
-    sudoku = Sudoku(N=2)
+    sudoku = Sudoku(digits=4,N=3)
     print(sudoku.grid)
     print(not (0 in sudoku.grid))
