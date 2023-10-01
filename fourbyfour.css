@@ -1,0 +1,48 @@
+
+    .row {
+        display: flex;
+        }
+    .column {
+        float: left;
+        width: 50%;
+        padding: 5px;
+        }
+
+    table {
+        margin:2em auto;
+        border-spacing: 0cm;
+      }
+      td {
+        height:30px;
+        width:30px;
+        border:1px solid;
+        text-align:center;
+      }
+      td:first-child {
+        border-left:solid;
+      }
+      td:nth-child(2n) {
+        border-right:solid ;
+      }
+      tr:nth-child(4n) td {
+        border-bottom:solid ;
+      }
+      tr:nth-child(2n+1) td {
+        border-top:solid ;
+      }
+
+      .cell {
+        background-color: beige;
+      }
+      /*
+      Projection plane cells, don't actually update when mouse hovers over them. 
+      They are meant to change colour when user hovers over a cell from another grid that is in the plane.
+      */
+      .pcell[scope='blue'] {
+        background-color: lightcyan;
+      }
+      .pcell[scope='red'] {
+        background-color: rgb(255, 210, 200);
+      }
+      
+      
